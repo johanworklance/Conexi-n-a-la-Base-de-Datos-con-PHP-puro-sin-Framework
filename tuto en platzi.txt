@@ -1,0 +1,260 @@
+**¡Hola!  Te mostrare como acceder a la BD usando la clase mysqli que nos permite una conexión entre PHP y una base de datos MySQL.**
+
+	Primeramente necesitaras haber creado una base de datos, para este tutorial he creado una base de datos llamada “tutorial” con una tabla “usuarios” con 2 campos “nombre” y “hobby”; he usado XAMPP para el servidor local y phpMyAdmin para  la creación y registro de la base de datos, ahora ¡Comencemos!
+
+![](https://i.ibb.co/ySHSFS2/estructura-BD.png)
+
+Definimos una serie de parámetros que necesitaremos para conectarnos, usando la función "define". 
+
+	Las constantes para la base de datos serán: el host, tu usuario con el cual accedes a la base de datos, tu password y finalmente el nombre  de la BD, guardaremos esto en un archivo llamado “config.php”.
+
+
+
+```
+<?php 
+define("DB_HOST","localhost");
+define("DB_USER","johan");
+define("DB_PASS","edrftgyhujc1");
+define("DB_NAME","tutorial");
+?>
+
+```
+
+	Ahora crearemos un nuevo archivo llamado “Database.php”, en el cual crearemos la clase que usaremos para todos las funciones de conexión con la BD. Dentro del código documento que hace cada sentencia.
+
+
+
+```
+<?php
+
+class Database{
+
+    protected $db;//sera una instancia de la clase mysqli
+    protected $prep;/*sera una instancia del objeto que devuelve el metodo "prepare" de la instancia $db de la clase mysqli*/
+    protected $consulta;/*sera la consulta sql que enviaremos como parametro al metodo preparar*/
+
+
+    /*En el metodo constructor de la clase, $db pasara a ser una instancia de la clase mysqli, despúes verificamos que no haya habido algún error, usando la propiedad "connect_errno" que devolvera un codigo de error, si envia 0 entonces no ocurrieron errores. (0 = false).*/
+
+    public function __construct($dbhost, $dbuser, $db_pass, $db_name){
+        $this->db= new mysqli($dbhost, $dbuser, $db_pass, $db_name);
+        if($this->db->connect_errno){
+            echo "error<br>Fallo la conexion con Mysql, tipo de error -> ({$this->db->connect_error}) <a href='index.php'>Regresar</a>";  
+        }
+    }
+
+    /*En el metodo preparar, recibiremos la consulta como parametro y se la daremos al metodo "prepare" que la preparara; mandara false si el servidor tuvo problemas con la sentencia de consulta.*/
+
+    public function preparar($consulta){
+        $this->consulta= $consulta;
+        $this->prep= $this->db->prepare($this->consulta);
+        if(!$this->prep){
+            echo("Error al preparar la consulta. <a href='index.php'>Regresar</a>");
+        } 
+    }
+
+    /*Dado que "prepare" además de preparar la consulta devuelve un objeto tipo sentencia, es este último quien tiene el metodo "execute" el cual ejecuta la sentencia en el servidor.*/
+
+    public function ejecutar(){
+        $this->prep->execute();
+    }
+
+    /*Usaremos una función pública para acceder a la sentencia que es una variable encapsulada/protected desde afuera de la clase, ya que usaremos un método que posee.*/
+
+    public function prep(){
+        return $this->prep;
+    }
+
+    /*El metodo resultado hara uso del metodo fetch que trae una fila de la busquedad que haya hecho en la base de datos, dado que solo trae una, haremos uso de un ciclo while despúes, para que muestre todos los registros.*/
+
+    public function resultado(){
+        return $this->prep->fetch(); 
+    }
+
+    /*Literalmente libera de memoria la consulta, es regla, de otra manera nos mandara error si intentamos otra consulta*/
+    
+    public function liberar(){
+        $this->prep->free_result();
+    }
+
+    /*El método "query" es directo de la instancia $db de la clase mysqli, nos permite hacer una consulta directa, la uso en este "validadDatos" para corroborar si el usuario ya existe, enviándole de parametros, la columna que queremos, de que tabla y bajo que condición, es un SELECT sencillo.*/
+
+    public function validarDatos($columna, $tabla, $condicion){
+        $this->resultado= $this->db->query("SELECT $columna FROM $tabla WHERE $columna = '$condicion'");
+        $chequear= $this->resultado->num_rows;
+        return $chequear; 
+    }
+    
+    //Al cerrar la consulta y despúes la "conexión" liberamos la memoria, es regla.
+    public function cerrar(){
+        $this->prep->close();
+        $this->db->close();
+    }
+    
+}
+?>
+```
+
+	Lo siguiente es crear un pequeño formulario, hago uso del Framework Bootstrap para el CSS, en el registraremos solo 2 campos, “nombre” y “hobby”. Nuestro formulario apuntara a un archivo que llamaremos registro.php.
+
+
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tutorial Conexión PHP BD puro</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<style>
+		.col-centrar{
+			margin: 0 auto;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-centrar">
+				<h1>Por favor ingrese los datos:</h1>
+
+				<form method="post" action="registro.php">
+				  <div class="form-group">
+				    <label for="nombre">Nombre</label>
+				    <input type="text" class="form-control" name="nombre" > 
+				  </div>
+				  <div class="form-group">
+				    <label for="hobby">Hobby</label>
+				    <input type="text" class="form-control" name="hobby" > 
+				  </div>
+				  <button type="submit" class="btn btn-primary">Enviar</button>
+				</form>
+			</div>	
+		</div>
+	</div>
+		
+
+
+	<script src="js/jquery-3.5.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>```
+
+![](https://i.ibb.co/gWzr68J/formulario.png)
+
+	Veamos que código posee el registro.php el cual usaremos para registrar los datos en la BD, y también mostrar en una tabla sencilla, los campos que se guardaron.
+
+
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Registro</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	
+</head>
+<body>
+	<?php
+
+	/*Con el require_once haremos uso del archivo Config.php donde guardamos en constantes los datos requeridos para conectarnos a la BD.*/
+
+	require_once "Config.php";
+
+	/*La función spl_autoload_register permite cargar o llamar automáticamente una función que le pasemos, es decir es un "autoloader", dentro pasaremos un "require_once" con un parametro $clase, el truco es que, cuando instanciemos una clase que no esta en nuestro archivo, esa variable tomara el nombre de la clase, en el caso más abajo será "Database", así si en un futuro tenemos muchas clases en distintos archivos, no tendremos que hacer un "require" o un "include" por cada una.*/
+
+	spl_autoload_register(function($clase){
+		require_once "$clase.php";
+	});
+
+	/*"extract" tomara los datos del Array que vienen el POST y los convertira en variables declarandolas usando como valor los "name" que tienen cada input de nuestro formulario, es decir, de lo extraido en POST saldran las variables $nombre y $hobby con los valores que hayamos introducido en el formulario.*/
+
+	extract($_POST, EXTR_OVERWRITE);
+
+	//Instanciamos la clase Database para hacer la conexión y las consultas.
+
+	$db= new Database(DB_HOST,DB_USER,DB_PASS,DB_NAME);
+
+	/*Con $validarUsuario haremos una pequeña validación, que consiste en que no se registren nombres de usuario que ya esten en BD; pasamos la columna, la tabla y el valor del formulario, entonces en "validarDatos" llegara la consulta "SELECT nombre FROM usuarios WHERE nombre= 'fulanito'" si resulta que encuentra algo entonces con la propiedad "num_rows" de la consulta mandará un valor de 1 registro.*/
+
+	$validarUsuario= $db->validarDatos("nombre","usuarios",$nombre);
+	if($validarUsuario>0){
+		echo "Usuario ya registrado, ingrese otros datos. <a href='index.php'>Regresar</a>";
+	}else{
+
+		/*Ahora si no está registrado el nombre que le pasamos entonces haremos el registro; en la función "preparar" mandaremos la inserción de datos usando las variables que previamente "extract" extrajo de lo venido en el POST.*/
+
+			$db->preparar("INSERT INTO usuarios VALUES ('$nombre','$hobby')");
+
+		/*Ahora por regla usaremos el "ejecutar" y ya se habra logrado la inserción en la BD*/
+
+			$db->ejecutar();
+			echo("Te has registrado perfectamente.");
+
+		/*Liberamos para que podamos hacer la siguiente consulta, es regla.*/
+
+			$db->liberar();
+		
+		/*Ahora en vez de insertar haremos una selección de todos los datos y ejecutaremos*/
+
+			$db->preparar("SELECT * FROM usuarios");
+			$db->ejecutar();
+
+		/*Aquí haremos uso de la consulta que estaba encapsulada en la clase, por que haremos uso del método "bind_result" que nos asigna cada registro que la consulta haya hecho a las variables que le suministremos (Se declaran dentro del mismo paso de parametros).*/
+
+			$db->prep()->bind_result($nombre_BD,$hobby_BD);
+	
+		/*Aquí crearemos la tabla a base del uso de "echo" con código HTML*/
+
+			echo '<table class="table">
+			  <thead>
+			    <tr>
+			      <th scope="col">Nombre</th>
+			      <th scope="col">Hobby</th>
+			    </tr>
+			  </thead>
+			  <tbody>';
+
+		/*Para mostrar en fila cada resultado encontrado en la BD, haremos uso del metodo "resultado" que recordemos tiene el "return $this->prep->fetch();" el metodo "fetch" de la consulta trae una fila de la tabla resultado de la consulta, usamos un while para que itere con cada registro encontrado, de no usarlo, entonces solo nos enviaria la primera fila de todo lo encontrado*/ 
+
+			  while($db->resultado()){
+			  	echo"
+			  	<tr>
+			      <td>$nombre_BD</td>
+			      <td>$hobby_BD</td>
+			    </tr>
+			    ";
+			  } 
+			 echo '</tbody>
+			</table>';
+
+		/*Liberamos la consulta*/
+
+			$db->liberar();
+
+		/*Y finalmente cerramos toda la conexión*/
+		
+			$db->cerrar();
+	}
+
+	
+
+	?>
+<script src="js/jquery-3.5.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>```
+
+	Verificamos que se registren los datos en la BD y que se muestren en pantalla.
+
+![](https://i.ibb.co/px8NCNs/BD.png)
+
+![](https://i.ibb.co/FWD1tLP/registros.png)
+
+	Y hemos terminado, espero esto te ayude, a mi me ha servido para repasar, nunca pares de aprender como dicen en Platzi, y un saludo!
+
+
+
