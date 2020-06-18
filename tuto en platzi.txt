@@ -1,12 +1,12 @@
 **¡Hola!  Te mostrare como acceder a la BD usando la clase mysqli que nos permite una conexión entre PHP y una base de datos MySQL.**
 
-	Primeramente necesitaras haber creado una base de datos, para este tutorial he creado una base de datos llamada “tutorial” con una tabla “usuarios” con 2 campos “nombre” y “hobby”; he usado XAMPP para el servidor local y phpMyAdmin para  la creación y registro de la base de datos, ahora ¡Comencemos!
+Primeramente necesitaras haber creado una base de datos, para este tutorial he creado una base de datos llamada “tutorial” con una tabla “usuarios” con 2 campos “nombre” y “hobby”; he usado XAMPP para el servidor local y phpMyAdmin para  la creación y registro de la base de datos, ahora ¡Comencemos!
 
 ![](https://i.ibb.co/ySHSFS2/estructura-BD.png)
 
 Definimos una serie de parámetros que necesitaremos para conectarnos, usando la función "define". 
 
-	Las constantes para la base de datos serán: el host, tu usuario con el cual accedes a la base de datos, tu password y finalmente el nombre  de la BD, guardaremos esto en un archivo llamado “config.php”.
+Las constantes para la base de datos serán: el host, tu usuario con el cual accedes a la base de datos, tu password y finalmente el nombre  de la BD, guardaremos esto en un archivo llamado “config.php”.
 
 
 
@@ -20,7 +20,7 @@ define("DB_NAME","tutorial");
 
 ```
 
-	Ahora crearemos un nuevo archivo llamado “Database.php”, en el cual crearemos la clase que usaremos para todos las funciones de conexión con la BD. Dentro del código documento que hace cada sentencia.
+Ahora crearemos un nuevo archivo llamado “Database.php”, en el cual crearemos la clase que usaremos para todos las funciones de conexión con la BD. Dentro del código documento que hace cada sentencia.
 
 
 
@@ -95,7 +95,7 @@ class Database{
 ?>
 ```
 
-	Lo siguiente es crear un pequeño formulario, hago uso del Framework Bootstrap para el CSS, en el registraremos solo 2 campos, “nombre” y “hobby”. Nuestro formulario apuntara a un archivo que llamaremos registro.php.
+Lo siguiente es crear un pequeño formulario, hago uso del Framework Bootstrap para el CSS, en el registraremos solo 2 campos, “nombre” y “hobby”. Nuestro formulario apuntara a un archivo que llamaremos registro.php.
 
 
 
@@ -139,11 +139,13 @@ class Database{
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/bootstrap.bundle.min.js"></script>
 </body>
-</html>```
+</html>
+```
 
 ![](https://i.ibb.co/gWzr68J/formulario.png)
 
-	Veamos que código posee el registro.php el cual usaremos para registrar los datos en la BD, y también mostrar en una tabla sencilla, los campos que se guardaron.
+	
+Veamos que código posee el registro.php el cual usaremos para registrar los datos en la BD, y también mostrar en una tabla sencilla, los campos que se guardaron.
 
 
 
@@ -246,15 +248,18 @@ class Database{
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/bootstrap.bundle.min.js"></script>
 </body>
-</html>```
+</html>
+```
 
-	Verificamos que se registren los datos en la BD y que se muestren en pantalla.
+Verificamos que se registren los datos en la BD y que se muestren en pantalla.
+
 
 ![](https://i.ibb.co/px8NCNs/BD.png)
 
 ![](https://i.ibb.co/FWD1tLP/registros.png)
 
-	Y hemos terminado, espero esto te ayude, a mi me ha servido para repasar, nunca pares de aprender como dicen en Platzi, y un saludo!
+
+Y hemos terminado, espero esto te ayude, a mi me ha servido para repasar, nunca pares de aprender como dicen en Platzi, y un saludo!
 
 
 
